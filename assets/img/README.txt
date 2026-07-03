@@ -1,3 +1,2 @@
-히어로 배경 이미지를 이 폴더에 `hero.jpg` 파일명으로 넣으면 자동 적용됩니다.
-권장: 가로 2000px 이상, 어두운 톤 이미지 (밝은 글씨 시인성 유지).
-경로/파일명 변경 시 assets/css/style.css 의 --hero-image 값을 수정하세요.
+히어로 배경 이미지는 hero.webp 입니다 (약 50KB, 1448px).
+교체 시 같은 파일명으로 넣거나 assets/css/style.css 의 --hero-image 값을 수정하세요.

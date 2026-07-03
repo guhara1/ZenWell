@@ -163,7 +163,7 @@ ul, ol { color: var(--color-text-soft); }
 .hero {
   position: relative; padding-block: clamp(72px, 11vw, 148px); overflow: hidden;
   /* 히어로 배경 이미지: 아래 경로에 이미지를 넣으면 자동 적용됩니다. */
-  --hero-image: url("/assets/img/hero.jpg");
+  --hero-image: url("/assets/img/hero.webp");
 }
 /* 배경 이미지 레이어 */
 .hero__bg {
