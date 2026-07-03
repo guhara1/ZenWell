@@ -50,6 +50,31 @@ function resolveZone(area, zoneName) {
 
 const HOME = { label: '경기 홈', url: '/' };
 
+/* 제목·설명 차별화: note/desc에서 특성 문구 추출 + 패턴 회전(지역명만 바뀐 복붙 방지) */
+function charPhrase(s) {
+  s = String(s || '').trim();
+  const m = s.match(/^(.*?(?:생활권|산업권|업무권|상권|산단|지역|권역|신도시|역세권))/);
+  if (m) return m[1];
+  return s.replace(/(을|를)?\s*안내합니다\.?$/, '').replace(/입니다\.?$/, '').replace(/\.$/, '').trim();
+}
+function variedTitle(region, phrase, seed) {
+  const p = (phrase || '방문 가능 지역').trim();
+  return pickVariant(seed, [
+    `${region} 출장마사지 | ${p}`,
+    `${region} 출장마사지·홈타이 | ${p}`,
+    `${region} 출장마사지 · ${p} 안내`,
+    `${region} 출장마사지 ㅣ ${p} 방문 안내`,
+  ]);
+}
+function variedDesc(region, phrase, seed) {
+  const p = (phrase || '자택·호텔·오피스텔 이용 기준').trim();
+  return pickVariant(seed, [
+    `${region} 출장마사지·홈타이 예약 전 ${p} 안내.`,
+    `${region} 출장마사지 예약 전 ${p} 확인 안내.`,
+    `${region} 출장마사지 방문 전 ${p} 이용 안내.`,
+  ]);
+}
+
 /* 공통 Who/How/Why + FAQ */
 const whoHowWhy = {
   who: '경기도 권역·생활권과 이용 장소 기준을 정리해 온 운영진이 실제 이동·예약 확인 절차를 바탕으로 안내합니다.',
@@ -77,6 +102,19 @@ const referenceSection = () => `
   <section class="section section--tight wrap">
     ${C.sectionHead('참고 기준', '참고 · 공식 정보 출처', '행정구역·교통·개인정보·소비자 기준은 아래 공식 출처를 참고하세요.')}
     ${C.linkList(authorityLinks())}
+  </section>`;
+
+/* 마사지 가격표 — 모든 지역 페이지 공통 */
+const PRICE_PLANS = [
+  { name: '60분 코스', price: '90,000', time: '60분', desc: '기본 컨디션·릴렉스 케어' },
+  { name: '90분 코스', price: '150,000', time: '90분', desc: '아로마 포함 추천 구성', featured: true },
+  { name: '120분 코스', price: '180,000', time: '120분', desc: '전신 집중 프리미엄 케어' },
+];
+const pricingSection = (regionName) => `
+  <section class="section--tight wrap" id="pricing">
+    ${C.sectionHead('요금 안내', `${regionName ? regionName + ' 출장마사지 ' : ''}이용 코스와 요금`, '60·90·120분 코스별 기준 요금이며, 추가 비용 없이 있는 그대로 안내해 드립니다.')}
+    ${C.pricing(PRICE_PLANS)}
+    <p class="text-center" style="margin-top:20px;color:var(--color-text-muted)">지역·예약 시간대·이동 거리에 따라 상담 시 최종 확인됩니다.</p>
   </section>`;
 
 /* =========================================================================
@@ -240,6 +278,8 @@ function buildAreas() {
       </div>
     </section>
 
+    ${pricingSection(a.name)}
+
     <section class="section--tight wrap">
       ${C.sectionHead('FAQ', `${a.name} 자주 묻는 질문`)}
       ${C.faqBlock(faqs)}
@@ -255,7 +295,7 @@ function buildAreas() {
     `;
 
     emit(url, page({
-      url, canonical: url, title: `${a.name} 출장마사지 · 경기 권역 생활권 안내`, desc: a.desc, crumbs, faqs, body,
+      url, canonical: url, title: variedTitle(a.name, charPhrase(a.lead), a.slug), desc: a.desc, crumbs, faqs, body,
     }), { priority: 0.9 });
   });
 }
@@ -318,6 +358,7 @@ function buildCities() {
       </div>
       ${C.checklist(R.baseChecklist)}
     </section>
+    ${pricingSection(name)}
     <section class="section--tight wrap">
       ${C.sectionHead('FAQ', `${name} 자주 묻는 질문`)}
       ${C.faqBlock(faqs)}
@@ -325,7 +366,7 @@ function buildCities() {
     ${whoHowWhySection()}
     ${referenceSection()}
     `;
-    emit(url, page({ url, canonical: url, title: h1, desc: `${name} 출장마사지 안내. ${zoneList.slice(0,3).join('·')} 생활권 이용 전 확인사항.`, crumbs, faqs, body }), { priority: 0.8 });
+    emit(url, page({ url, canonical: url, title: variedTitle(name, `${zoneList.slice(0, 3).join('·')} 생활권`, slug), desc: variedDesc(name, `${zoneList.slice(0, 3).join('·')} 생활권`, slug), crumbs, faqs, body }), { priority: 0.8 });
   });
 }
 
@@ -372,13 +413,14 @@ function buildDistricts() {
         <div class="prose"><h2>예약 전 체크리스트</h2></div>
         ${C.checklist(R.baseChecklist)}
       </section>
+      ${pricingSection(`${cityName} ${gu.name}`)}
       <section class="section--tight wrap">${C.sectionHead('FAQ', `${gu.name} 자주 묻는 질문`)}${C.faqBlock(guFaqs)}</section>
       ${referenceSection()}
       `;
       emit(guUrl, page({
         url: guUrl, canonical: guUrl,
-        title: `${cityName} ${gu.name} 출장마사지 · 생활권 안내`,
-        desc: `${cityName} ${gu.name} 출장마사지 안내. 소속 행정동별 이용 전 확인사항.`,
+        title: variedTitle(`${cityName} ${gu.name}`, charPhrase(gu.desc), gu.slug),
+        desc: variedDesc(`${cityName} ${gu.name}`, charPhrase(gu.desc), gu.slug),
         crumbs: guCrumbs, faqs: guFaqs, body: guBody,
       }), { priority: 0.7 });
 
@@ -387,7 +429,7 @@ function buildDistricts() {
         const [dSlug, dName, dNote] = dg;
         const dUrl = `${guUrl}${dSlug}/`;
         const dCrumbs = [...guCrumbs, { label: dName, url: dUrl }];
-        const h1 = `${dName} 출장마사지 · ${gu.name} 생활권 안내`;
+        const h1 = `${dName} 출장마사지`;
         const intro = pickVariant(dSlug, [
           `${dName}은 ${cityName} ${gu.name}에 속한 생활권입니다.`,
           `${cityName} ${gu.name}의 ${dName} 일대는 실제 방문 시 생활권 기준 확인이 필요한 지역입니다.`,
@@ -417,13 +459,14 @@ function buildDistricts() {
           </div>
         </section>
         ${others.length ? `<section class="section--tight wrap">${C.sectionHead('관련 지역', `${gu.name} 인접 행정동`)}${C.linkList(others)}</section>` : ''}
+        ${pricingSection(dName)}
         <section class="section--tight wrap">${C.sectionHead('FAQ', `${dName} 자주 묻는 질문`)}${C.faqBlock(dFaqs)}</section>
         ${referenceSection()}
         `;
         emit(dUrl, page({
           url: dUrl, canonical: dUrl,
-          title: `${dName} 출장마사지 · ${gu.name} 생활권 안내`,
-          desc: `${dName} 출장마사지 안내. ${gu.name} 생활권 이용 전 확인사항.`,
+          title: variedTitle(dName, charPhrase(dNote), dSlug),
+          desc: variedDesc(dName, charPhrase(dNote), dSlug),
           crumbs: dCrumbs, faqs: dFaqs, body: dBody,
         }), { priority: 0.55 });
       });
@@ -447,7 +490,7 @@ function buildCityDongs() {
       const [dSlug, dName, dNote] = dg;
       const dUrl = `${cityUrl}${dSlug}/`;
       const dCrumbs = [HOME, { label: '도시별 안내', url: idxCityUrl }, { label: cityName, url: cityUrl }, { label: dName, url: dUrl }];
-      const h1 = `${dName} 출장마사지 · ${cityName} 생활권 안내`;
+      const h1 = `${dName} 출장마사지`;
       const intro = pickVariant(dSlug, [
         `${dName}은 ${cityName}에 속한 생활권입니다.`,
         `${cityName}의 ${dName} 일대는 실제 방문 시 생활권 기준 확인이 필요한 지역입니다.`,
@@ -477,12 +520,14 @@ function buildCityDongs() {
         </div>
       </section>
       ${others.length ? `<section class="section--tight wrap">${C.sectionHead('관련 지역', `${cityName} 인접 지역`)}${C.linkList(others)}</section>` : ''}
+      ${pricingSection(dName)}
       <section class="section--tight wrap">${C.sectionHead('FAQ', `${dName} 자주 묻는 질문`)}${C.faqBlock(dFaqs)}</section>
       ${referenceSection()}
       `;
       emit(dUrl, page({
         url: dUrl, canonical: dUrl,
-        title: h1, desc: `${dName} 출장마사지 안내. ${cityName} 생활권 이용 전 확인사항.`,
+        title: variedTitle(dName, charPhrase(dNote), dSlug),
+        desc: variedDesc(dName, charPhrase(dNote), dSlug),
         crumbs: dCrumbs, faqs: dFaqs, body: dBody,
       }), { priority: 0.55 });
     });
@@ -509,7 +554,7 @@ function buildLife() {
     const url = `/gyeonggi/life/${slug}/`;
     const crumbs = [HOME, { label: '생활권', url: idxUrl }, { label: name, url }];
     const lifeBase = name.replace(/\s*생활권$/, '');
-    const h1 = `${lifeBase} 출장마사지 · 생활권 안내`;
+    const h1 = `${lifeBase} 출장마사지`;
     const faqs = baseFaqs.slice(0, 4);
     const body = `
     ${C.pageHero(`${city ? city[1] : '경기'} 생활권`, h1, desc)}
@@ -524,11 +569,12 @@ function buildLife() {
       </div>
       ${C.checklist(R.baseChecklist)}
     </section>
+    ${pricingSection(lifeBase)}
     <section class="section--tight wrap">${C.sectionHead('FAQ', `${name} 자주 묻는 질문`)}${C.faqBlock(faqs)}</section>
     ${referenceSection()}
     `;
     // 생활권 상세는 얇을 수 있어 index 유지하되 본문 충분히 확보
-    emit(url, page({ url, canonical: url, title: h1, desc, crumbs, faqs, body }), { priority: 0.7 });
+    emit(url, page({ url, canonical: url, title: variedTitle(lifeBase, charPhrase(desc), slug), desc, crumbs, faqs, body }), { priority: 0.7 });
   });
 }
 
