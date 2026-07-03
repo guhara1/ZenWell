@@ -191,6 +191,22 @@ const cities = [
   ['gimpo', '김포시', '장기·구래·풍무·사우·고촌', '한강신도시와 서울 서부 연결성이 강한 도시입니다.', 'bucheon-siheung-ansan-gimpo'],
   ['gwangmyeong', '광명시', '광명역·철산·하안·소하', 'KTX 광명역과 서울 접경 주거지 중심의 도시입니다.', 'anyang-gwangmyeong-gunpo-uiwang'],
   ['hanam', '하남시', '미사·감일·풍산·검단산', '서울 동부 접경 신도시 생활권 중심의 도시입니다.', 'namyangju-uijeongbu-yangju-guri'],
+  // 2차·3차 색인 시군 (경기 전 지역 포함)
+  ['osan', '오산시', '오산역·세교·운암·궐동', '세교신도시와 오산역 상권 중심의 도시입니다.', 'pyeongtaek-anseong-osan-icheon'],
+  ['gunpo', '군포시', '산본·금정·당동·대야', '산본신도시 주거 생활권 중심의 도시입니다.', 'anyang-gwangmyeong-gunpo-uiwang'],
+  ['uiwang', '의왕시', '내손·오전·고천·부곡', '인덕원 접경과 의왕 주거 생활권 도시입니다.', 'anyang-gwangmyeong-gunpo-uiwang'],
+  ['gwacheon', '과천시', '중앙·별양·갈현·과천', '서울 접경 행정·주거 생활권 도시입니다.', 'anyang-gwangmyeong-gunpo-uiwang'],
+  ['gwangju', '광주시', '경안·태전·오포·곤지암', '성남·용인 접경 동부 생활권 도시입니다.', 'seongnam-bundang-pangyo'],
+  ['icheon', '이천시', '창전·증포·부발·장호원', '하이닉스 인접 산업·외곽 생활권 도시입니다.', 'pyeongtaek-anseong-osan-icheon'],
+  ['anseong', '안성시', '안성동·공도·죽산', '공도 산업권과 외곽 이동 생활권 도시입니다.', 'pyeongtaek-anseong-osan-icheon'],
+  ['yangju', '양주시', '옥정·회천·덕정·백석', '옥정신도시와 덕정 생활권 도시입니다.', 'namyangju-uijeongbu-yangju-guri'],
+  ['guri', '구리시', '수택·교문·인창·갈매', '서울 동부 접경 주거·상권 도시입니다.', 'namyangju-uijeongbu-yangju-guri'],
+  ['pocheon', '포천시', '포천동·소흘·선단', '북부 외곽 이동·관광 생활권 도시입니다.', 'namyangju-uijeongbu-yangju-guri'],
+  ['dongducheon', '동두천시', '생연·중앙·불현·소요', '경기 북부 접경 상권 도시입니다.', 'namyangju-uijeongbu-yangju-guri'],
+  ['yeoju', '여주시', '여흥·중앙·오학·가남', '남한강 인접 외곽 생활권 도시입니다.', 'pyeongtaek-anseong-osan-icheon'],
+  ['yangpyeong', '양평군', '양평읍·용문·양서·강상', '펜션·전원 외곽 이동 생활권 지역입니다.', 'pyeongtaek-anseong-osan-icheon'],
+  ['gapyeong', '가평군', '가평읍·청평·설악·조종', '관광·펜션 외곽 이동 생활권 지역입니다.', 'namyangju-uijeongbu-yangju-guri'],
+  ['yeoncheon', '연천군', '연천읍·전곡·청산·백학', '북부 최외곽 이동 기준 확인 지역입니다.', 'namyangju-uijeongbu-yangju-guri'],
 ];
 
 /* 이용 장소 페이지 ------------------------------------------------------------ */

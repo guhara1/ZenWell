@@ -9,6 +9,7 @@ const path = require('path');
 const site = require('./src/data/site');
 const R = require('./src/data/regions');
 const D = require('./src/data/districts');
+const DG = require('./src/data/dongs');
 const { page } = require('./src/templates/layout');
 const C = require('./src/templates/components');
 
@@ -299,6 +300,11 @@ function buildCities() {
       ${C.sectionHead('행정구', `${name} 행정구 안내`, '행정구를 선택하면 소속 행정동 안내로 이동합니다.')}
       ${C.cardGrid(D[slug].districts.map((g) => ({ url: `/gyeonggi/city/${slug}/${g.slug}/`, tag: '행정구', title: g.name, desc: g.desc })), D[slug].districts.length >= 3 ? 3 : 2)}
     </section>` : ''}
+    ${DG[slug] ? `
+    <section class="section--tight wrap">
+      ${C.sectionHead('행정동', `${name} 행정동 안내`, '행정동을 선택하면 해당 지역 이용 전 확인사항으로 이동합니다.')}
+      ${C.cardGrid(DG[slug].map((dg) => ({ url: `/gyeonggi/city/${slug}/${dg[0]}/`, tag: '행정동', title: dg[1], desc: dg[2] })), 4)}
+    </section>` : ''}
     <section class="section--tight wrap">
       <div class="prose">
         <h2>${name} 생활권 개요</h2>
@@ -421,6 +427,64 @@ function buildDistricts() {
           crumbs: dCrumbs, faqs: dFaqs, body: dBody,
         }), { priority: 0.55 });
       });
+    });
+  });
+}
+
+/* =========================================================================
+   행정동 (구 없는 시군: 시 → 동 직접)
+   ========================================================================= */
+function buildCityDongs() {
+  Object.keys(DG).forEach((citySlug) => {
+    const cityRow = cityBySlug[citySlug];
+    if (!cityRow) return;
+    const cityName = cityRow[1];
+    const areaSlug = cityRow[4];
+    const dongs = DG[citySlug];
+    const cityUrl = `/gyeonggi/city/${citySlug}/`;
+
+    dongs.forEach((dg) => {
+      const [dSlug, dName, dNote] = dg;
+      const dUrl = `${cityUrl}${dSlug}/`;
+      const dCrumbs = [HOME, { label: '도시별 안내', url: idxCityUrl }, { label: cityName, url: cityUrl }, { label: dName, url: dUrl }];
+      const h1 = `${dName} 출장마사지 · ${cityName} 생활권 안내`;
+      const intro = pickVariant(dSlug, [
+        `${dName}은 ${cityName}에 속한 생활권입니다.`,
+        `${cityName}의 ${dName} 일대는 실제 방문 시 생활권 기준 확인이 필요한 지역입니다.`,
+        `${dName}은 ${cityName} 안에서도 이동 경로와 숙소 형태를 따로 확인하는 것이 좋은 생활권입니다.`,
+      ]);
+      const others = dongs.filter((x) => x[0] !== dSlug).slice(0, 4)
+        .map((x) => ({ url: `${cityUrl}${x[0]}/`, label: `${x[1]} 이용 전 확인` }));
+      const dFaqs = [
+        { q: `${dName}도 방문 가능한가요?`, a: `${dName}의 정확한 주소와 가까운 역·생활권, 예약 가능 시간, 이동 기준을 확인한 뒤 안내합니다.` },
+        ...baseFaqs.slice(0, 3),
+      ];
+      const dBody = `
+      ${C.pageHero(cityName, h1, dNote)}
+      ${C.breadcrumb(dCrumbs)}
+      <section class="section--tight wrap">
+        <div class="prose">
+          <h2>${dName} 개요</h2>
+          <p>${intro} ${dNote} 같은 ${cityName}이라도 ${dName}은 인접 역세권·아파트 단지·상권·외곽 이동 기준에 따라 이용 기준이 달라집니다.</p>
+          <p>상위 도시인 <a href="${cityUrl}">${cityName} 생활권 안내</a>${areaSlug ? `와 상위 권역 <a href="/gyeonggi/area/${areaSlug}/">${areaBySlug[areaSlug].name}</a>` : ''}에서 인접 지역과 이동 기준을 함께 확인할 수 있습니다.</p>
+          <h2>이용 장소별 확인 기준</h2>
+          <p><a href="/gyeonggi/use/home/">자택</a>은 공동현관·엘리베이터·주차 동선, <a href="/gyeonggi/use/officetel/">오피스텔</a>은 관리 규정과 야간 출입, <a href="/gyeonggi/use/apartment/">아파트</a>는 공동현관과 방문 가능 시간대, <a href="/gyeonggi/use/hotel/">호텔·숙소</a>는 객실 출입과 프런트 확인 방식, 외곽 지역은 <a href="/gyeonggi/use/outer-area/">이동 거리·예약 시간 기준</a>을 먼저 확인하세요.</p>
+          <h2>예약 전 체크리스트</h2>
+        </div>
+        ${C.checklist(R.baseChecklist)}
+        <div class="prose" style="margin-top:24px">
+          <p>예약 확인에 필요한 최소 정보만 확인하며 자세한 내용은 <a href="/gyeonggi/policy/privacy/">개인정보 처리방침</a>에서 확인할 수 있습니다. 본 안내는 <a href="/gyeonggi/policy/service/">불법·선정적 서비스 불가 안내</a> 기준을 따릅니다.</p>
+        </div>
+      </section>
+      ${others.length ? `<section class="section--tight wrap">${C.sectionHead('관련 지역', `${cityName} 인접 지역`)}${C.linkList(others)}</section>` : ''}
+      <section class="section--tight wrap">${C.sectionHead('FAQ', `${dName} 자주 묻는 질문`)}${C.faqBlock(dFaqs)}</section>
+      ${referenceSection()}
+      `;
+      emit(dUrl, page({
+        url: dUrl, canonical: dUrl,
+        title: h1, desc: `${dName} 출장마사지 안내. ${cityName} 생활권 이용 전 확인사항.`,
+        crumbs: dCrumbs, faqs: dFaqs, body: dBody,
+      }), { priority: 0.55 });
     });
   });
 }
@@ -624,6 +688,7 @@ function run() {
   buildAreas();
   buildCities();
   buildDistricts();
+  buildCityDongs();
   buildLife();
   buildSimpleSet(R.useItems, '/gyeonggi/use/', '이용 장소', useExtra);
   buildSimpleSet(R.checkItems, '/gyeonggi/check/', '예약 전 확인', checkExtra);
