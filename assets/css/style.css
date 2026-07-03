@@ -387,6 +387,39 @@ a.card:hover { color: inherit; }
   .header-cta { display: none; }
 }
 
+/* =========================================================================
+   15. 모바일 전화 플로팅 버튼 (오렌지 · 애니메이션 · 터치 시 전화연결)
+   ========================================================================= */
+.call-fab {
+  position: fixed; right: 18px; bottom: 20px; z-index: 60;
+  display: none; align-items: center; gap: 8px;
+  height: 58px; padding: 0 20px 0 16px; border-radius: var(--radius-pill);
+  background: linear-gradient(180deg, var(--color-brand-soft), var(--color-brand));
+  color: var(--color-on-brand); font-weight: 800; font-size: 1rem; letter-spacing: -0.01em;
+  box-shadow: 0 12px 28px rgba(249,115,22,.5);
+  animation: fab-bob 1.8s ease-in-out infinite;
+}
+.call-fab:hover, .call-fab:active { color: var(--color-on-brand); }
+.call-fab svg { width: 26px; height: 26px; animation: fab-ring 1s ease-in-out infinite; }
+.call-fab__label { font-weight: 800; }
+/* 펄스 링 */
+.call-fab::before {
+  content: ""; position: absolute; inset: 0; border-radius: var(--radius-pill);
+  box-shadow: 0 0 0 0 rgba(249,115,22,.5); animation: fab-pulse 1.8s ease-out infinite; z-index: -1;
+}
+@keyframes fab-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(249,115,22,.5); }
+  70%  { box-shadow: 0 0 0 20px rgba(249,115,22,0); }
+  100% { box-shadow: 0 0 0 0 rgba(249,115,22,0); }
+}
+@keyframes fab-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes fab-ring {
+  0%,100% { transform: rotate(0); } 20% { transform: rotate(-14deg); }
+  40% { transform: rotate(12deg); } 60% { transform: rotate(-8deg); } 80% { transform: rotate(6deg); }
+}
+/* 데스크톱은 헤더에 전화 버튼이 있으므로 모바일에서만 노출 */
+@media (max-width: 940px) { .call-fab { display: inline-flex; } }
+
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }

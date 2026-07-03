@@ -27,6 +27,25 @@ function emit(url, html, meta = {}) {
 const cityBySlug = Object.fromEntries(R.cities.map((c) => [c[0], c]));
 const areaBySlug = Object.fromEntries(R.areas.map((a) => [a.slug, a]));
 
+/* 생활권 이름 → 링크 대상 해석 (생활권 페이지 → 도시 페이지 → 권역 내 대표 도시 순) */
+const normZ = (s) => s.replace(/[·\s]/g, '').replace(/신도시|생활권|안내|인접권|인접|일부/g, '');
+function resolveZone(area, zoneName) {
+  const zk = normZ(zoneName);
+  // 1) 생활권 상세 페이지
+  for (const l of R.lifeItems) {
+    const lk = normZ(l[1]);
+    if (lk && (zk.includes(lk) || lk.includes(zk))) return `/gyeonggi/life/${l[0]}/`;
+  }
+  // 2) 권역 내 도시 페이지 (첫 토큰 매칭)
+  const token = normZ(zoneName.split('·')[0]);
+  const inArea = R.cities.filter((c) => c[4] === area.slug);
+  const cityMatch = inArea.find((c) => token && normZ(c[2]).includes(token));
+  if (cityMatch) return `/gyeonggi/city/${cityMatch[0]}/`;
+  // 3) 폴백: 권역 대표(첫) 도시
+  if (inArea.length) return `/gyeonggi/city/${inArea[0][0]}/`;
+  return `/gyeonggi/city/`;
+}
+
 const HOME = { label: '경기 홈', url: '/' };
 
 /* 공통 Who/How/Why + FAQ */
@@ -189,7 +208,7 @@ function buildAreas() {
     const crumbs = [HOME, { label: '권역별 안내', url }, { label: a.name, url }];
     const related = a.related.map((s) => areaBySlug[s]).filter(Boolean)
       .map((r) => ({ url: `/gyeonggi/area/${r.slug}/`, tag: '인접 권역', title: r.name, desc: r.lead.slice(0, 50) + '…' }));
-    const zoneLinks = a.zones.map((z) => `<li><strong>${z[0]}</strong> — ${z[1]}</li>`).join('');
+    const zoneLinks = a.zones.map((z) => `<li><a href="${resolveZone(a, z[0])}"><strong>${z[0]}</strong></a> — ${z[1]}</li>`).join('');
 
     const faqs = [
       { q: `${a.name}은 어떤 생활권으로 나뉘나요?`, a: `${a.zones.map((z) => z[0]).join(', ')} 등 생활권으로 나뉘며, 각 생활권마다 이동 기준과 숙소 형태가 다릅니다.` },
@@ -490,6 +509,8 @@ function run() {
 
   // assets 복사
   fs.cpSync(path.join(__dirname, 'assets'), path.join(OUT, 'assets'), { recursive: true });
+  // 브라우저가 자동 요청하는 /favicon.ico 를 루트에 배치
+  fs.copyFileSync(path.join(__dirname, 'assets', 'favicon.ico'), path.join(OUT, 'favicon.ico'));
 
   buildHome();
   buildAreas();
