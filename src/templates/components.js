@@ -12,6 +12,17 @@ const breadcrumb = (crumbs) => `
     </ol></div>
   </nav>`;
 
+/* 지역/하위 페이지용 컴팩트 히어로 (메인과 동일한 배경 이미지 + 스크림) */
+const pageHero = (badge, h1, lead) => `
+  <section class="hero hero--compact">
+    <div class="hero__bg" aria-hidden="true"></div>
+    <div class="wrap hero__inner">
+      ${badge ? `<span class="badge-soft">${badge}</span>` : ''}
+      <h1>${h1}</h1>
+      ${lead ? `<p class="lead">${lead}</p>` : ''}
+    </div>
+  </section>`;
+
 const sectionHead = (eyebrow, h2, sub) => `
   <div class="section-head">
     ${eyebrow ? `<span class="eyebrow">${esc(eyebrow)}</span>` : ''}
@@ -73,5 +84,5 @@ const whoHowWhy = (data) => `
   </div>`;
 
 module.exports = {
-  breadcrumb, sectionHead, cardGrid, linkList, checklist, faqBlock, pricing, whoHowWhy,
+  breadcrumb, pageHero, sectionHead, cardGrid, linkList, checklist, faqBlock, pricing, whoHowWhy,
 };

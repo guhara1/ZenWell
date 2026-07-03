@@ -197,12 +197,8 @@ function buildAreas() {
     ];
 
     const body = `
+    ${C.pageHero('경기 7대 권역', a.h1, a.lead)}
     ${C.breadcrumb(crumbs)}
-    <section class="section--tight wrap">
-      <span class="badge-soft">경기 7대 권역</span>
-      <h1>${a.h1}</h1>
-      <p class="lead">${a.lead}</p>
-    </section>
 
     <section class="section--tight wrap">
       <div class="prose">
@@ -256,10 +252,9 @@ function buildCities() {
     title: '경기 도시별 출장마사지 안내',
     desc: '경기 도시별 출장마사지 안내. 수원·성남·용인·고양 등 핵심 도시 생활권 이용 기준.',
     crumbs: idxCrumbs,
-    body: `${C.breadcrumb(idxCrumbs)}
+    body: `${C.pageHero('도시별 안내', '경기 핵심 도시 안내', '핵심 도시부터 생활권 기준으로 이용 전 확인사항을 안내합니다.')}
+      ${C.breadcrumb(idxCrumbs)}
       <section class="section wrap">
-        <h1>경기 핵심 도시 안내</h1>
-        <p class="lead">핵심 도시부터 생활권 기준으로 이용 전 확인사항을 안내합니다.</p>
         ${C.cardGrid(cards, 4)}
       </section>${referenceSection()}`,
   }), { priority: 0.8 });
@@ -277,12 +272,8 @@ function buildCities() {
       ...baseFaqs.slice(0, 4),
     ];
     const body = `
+    ${C.pageHero(area ? area.name : '경기 핵심 도시', h1, summary)}
     ${C.breadcrumb(crumbs)}
-    <section class="section--tight wrap">
-      <span class="badge-soft">${area ? area.name : '경기 핵심 도시'}</span>
-      <h1>${h1}</h1>
-      <p class="lead">${summary}</p>
-    </section>
     <section class="section--tight wrap">
       <div class="prose">
         <h2>${name} 생활권 개요</h2>
@@ -318,7 +309,7 @@ function buildLife() {
     url: idxUrl, canonical: idxUrl, title: '경기 핵심 생활권 안내',
     desc: '경기 핵심 생활권 안내. 광교·판교·동탄·일산·배곧·고덕 생활권 이용 기준.',
     crumbs: idxCrumbs,
-    body: `${C.breadcrumb(idxCrumbs)}<section class="section wrap"><h1>경기 핵심 생활권</h1><p class="lead">신도시·업무지구·역세권 생활권 기준으로 이용 전 확인사항을 안내합니다.</p>${C.cardGrid(cards, 3)}</section>${referenceSection()}`,
+    body: `${C.pageHero('생활권', '경기 핵심 생활권', '신도시·업무지구·역세권 생활권 기준으로 이용 전 확인사항을 안내합니다.')}${C.breadcrumb(idxCrumbs)}<section class="section wrap">${C.cardGrid(cards, 3)}</section>${referenceSection()}`,
   }), { priority: 0.75 });
 
   R.lifeItems.forEach((l) => {
@@ -329,12 +320,8 @@ function buildLife() {
     const h1 = `${name} · 예약 전 확인 안내`;
     const faqs = baseFaqs.slice(0, 4);
     const body = `
+    ${C.pageHero(`${city ? city[1] : '경기'} 생활권`, h1, desc)}
     ${C.breadcrumb(crumbs)}
-    <section class="section--tight wrap">
-      <span class="badge-soft">${city ? city[1] : '경기'} 생활권</span>
-      <h1>${h1}</h1>
-      <p class="lead">${desc}</p>
-    </section>
     <section class="section--tight wrap">
       <div class="prose">
         <h2>${name} 개요</h2>
@@ -363,12 +350,8 @@ function buildSimpleSet(items, base, label, extra) {
     const crumbs = [HOME, { label, url }, { label: name, url }];
     const faqs = baseFaqs.slice(0, 4);
     const body = `
+    ${C.pageHero(label, `${name} · 이용 전 확인 안내`, desc)}
     ${C.breadcrumb(crumbs)}
-    <section class="section--tight wrap">
-      <span class="badge-soft">${label}</span>
-      <h1>${name} · 이용 전 확인 안내</h1>
-      <p class="lead">${desc}</p>
-    </section>
     <section class="section--tight wrap">
       <div class="prose">
         <h2>${name} 안내</h2>
@@ -394,7 +377,7 @@ function buildSimpleSet(items, base, label, extra) {
 function simplePage(url, title, desc, h1, inner, crumbs, opt = {}) {
   emit(url, page({
     url, canonical: url, title, desc, crumbs, noindex: opt.noindex,
-    body: `${C.breadcrumb(crumbs)}<section class="section wrap"><h1>${h1}</h1>${inner}</section>`,
+    body: `${C.pageHero(opt.badge || '운영 기준', h1, opt.lead || '')}${C.breadcrumb(crumbs)}<section class="section wrap">${inner}</section>`,
   }), { priority: opt.priority || 0.5 });
 }
 
