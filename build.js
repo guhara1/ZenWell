@@ -218,7 +218,7 @@ function buildAreas() {
     ];
 
     const body = `
-    ${C.pageHero('경기 7대 권역', a.h1, a.lead)}
+    ${C.pageHero('경기 7대 권역', `${a.name} 출장마사지`, a.lead)}
     ${C.breadcrumb(crumbs)}
 
     <section class="section--tight wrap">
@@ -255,7 +255,7 @@ function buildAreas() {
     `;
 
     emit(url, page({
-      url, canonical: url, title: a.h1, desc: a.desc, crumbs, faqs, body,
+      url, canonical: url, title: `${a.name} 출장마사지 · 경기 권역 생활권 안내`, desc: a.desc, crumbs, faqs, body,
     }), { priority: 0.9 });
   });
 }
@@ -270,10 +270,10 @@ function buildCities() {
   const idxCrumbs = [HOME, { label: '도시별 안내', url: idxUrl }];
   emit(idxUrl, page({
     url: idxUrl, canonical: idxUrl,
-    title: '경기 도시별 출장마사지 안내',
-    desc: '경기 도시별 출장마사지 안내. 수원·성남·용인·고양 등 핵심 도시 생활권 이용 기준.',
+    title: '경기 출장마사지 · 시군별 지역 안내',
+    desc: '경기 출장마사지 시군별 안내. 수원·성남·용인·고양 등 핵심 도시 생활권 기준.',
     crumbs: idxCrumbs,
-    body: `${C.pageHero('도시별 안내', '경기 핵심 도시 안내', '핵심 도시부터 생활권 기준으로 이용 전 확인사항을 안내합니다.')}
+    body: `${C.pageHero('도시별 안내', '경기 출장마사지 · 시군별 지역 안내', '수원·성남·용인 등 경기 전 시군을 생활권 기준으로 안내합니다.')}
       ${C.breadcrumb(idxCrumbs)}
       <section class="section wrap">
         ${C.cardGrid(cards, 4)}
@@ -297,12 +297,12 @@ function buildCities() {
     ${C.breadcrumb(crumbs)}
     ${D[slug] ? `
     <section class="section--tight wrap">
-      ${C.sectionHead('행정구', `${name} 행정구 안내`, '행정구를 선택하면 소속 행정동 안내로 이동합니다.')}
+      ${C.sectionHead('행정구', `${name} 출장마사지 · 행정구 선택`, '행정구를 선택하면 소속 행정동 지역으로 이동합니다.')}
       ${C.cardGrid(D[slug].districts.map((g) => ({ url: `/gyeonggi/city/${slug}/${g.slug}/`, tag: '행정구', title: g.name, desc: g.desc })), D[slug].districts.length >= 3 ? 3 : 2)}
     </section>` : ''}
     ${DG[slug] ? `
     <section class="section--tight wrap">
-      ${C.sectionHead('행정동', `${name} 행정동 안내`, '행정동을 선택하면 해당 지역 이용 전 확인사항으로 이동합니다.')}
+      ${C.sectionHead('행정동', `${name} 출장마사지 · 행정동 선택`, '행정동을 선택하면 해당 지역 이용 전 확인사항으로 이동합니다.')}
       ${C.cardGrid(DG[slug].map((dg) => ({ url: `/gyeonggi/city/${slug}/${dg[0]}/`, tag: '행정동', title: dg[1], desc: dg[2] })), 4)}
     </section>` : ''}
     <section class="section--tight wrap">
@@ -357,13 +357,13 @@ function buildDistricts() {
         ...baseFaqs.slice(0, 3),
       ];
       const guBody = `
-      ${C.pageHero(cityName, `${gu.name} · 행정동 안내`, gu.desc)}
+      ${C.pageHero(cityName, `${cityName} ${gu.name} 출장마사지`, gu.desc)}
       ${C.breadcrumb(guCrumbs)}
       <section class="section--tight wrap">
         <div class="prose">
-          <h2>${gu.name} 개요</h2>
+          <h2>${cityName} ${gu.name} 생활권 개요</h2>
           <p>${gu.name}은 ${gu.desc} 같은 구 안에서도 행정동마다 역세권·아파트 단지·상권·이동 기준이 달라, 방문 가능 여부를 행정동 단위로 확인하는 것이 정확합니다. 상위 도시인 <a href="/gyeonggi/city/${citySlug}/">${cityName}</a>${areaSlug ? ` 및 상위 권역 <a href="/gyeonggi/area/${areaSlug}/">${areaBySlug[areaSlug].name}</a>` : ''} 안내에서 인접 생활권과 이동 기준을 함께 확인할 수 있습니다.</p>
-          <h2>행정동 안내</h2>
+          <h2>${gu.name} 행정동 바로가기</h2>
           <p>아래에서 행정동을 선택하면 해당 지역 이용 전 확인사항으로 이동합니다.</p>
         </div>
         ${C.cardGrid(dongCards, dongCards.length >= 3 ? 3 : 2)}
@@ -377,7 +377,7 @@ function buildDistricts() {
       `;
       emit(guUrl, page({
         url: guUrl, canonical: guUrl,
-        title: `${cityName} ${gu.name} 출장마사지 · 행정동 안내`,
+        title: `${cityName} ${gu.name} 출장마사지 · 생활권 안내`,
         desc: `${cityName} ${gu.name} 출장마사지 안내. 소속 행정동별 이용 전 확인사항.`,
         crumbs: guCrumbs, faqs: guFaqs, body: guBody,
       }), { priority: 0.7 });
@@ -497,10 +497,10 @@ function buildLife() {
   const idxCrumbs = [HOME, { label: '생활권', url: idxUrl }];
   const cards = R.lifeItems.map((l) => ({ url: `/gyeonggi/life/${l[0]}/`, tag: '생활권', title: l[1], desc: l[3] }));
   emit(idxUrl, page({
-    url: idxUrl, canonical: idxUrl, title: '경기 핵심 생활권 안내',
-    desc: '경기 핵심 생활권 안내. 광교·판교·동탄·일산·배곧·고덕 생활권 이용 기준.',
+    url: idxUrl, canonical: idxUrl, title: '경기 출장마사지 · 생활권별 안내',
+    desc: '경기 출장마사지 생활권별 안내. 광교·판교·동탄·일산·배곧·고덕 생활권 기준.',
     crumbs: idxCrumbs,
-    body: `${C.pageHero('생활권', '경기 핵심 생활권', '신도시·업무지구·역세권 생활권 기준으로 이용 전 확인사항을 안내합니다.')}${C.breadcrumb(idxCrumbs)}<section class="section wrap">${C.cardGrid(cards, 3)}</section>${referenceSection()}`,
+    body: `${C.pageHero('생활권', '경기 출장마사지 · 생활권 안내', '신도시·업무지구·역세권 생활권 기준으로 이용 전 확인사항을 안내합니다.')}${C.breadcrumb(idxCrumbs)}<section class="section wrap">${C.cardGrid(cards, 3)}</section>${referenceSection()}`,
   }), { priority: 0.75 });
 
   R.lifeItems.forEach((l) => {
@@ -508,7 +508,8 @@ function buildLife() {
     const city = cityBySlug[citySlug];
     const url = `/gyeonggi/life/${slug}/`;
     const crumbs = [HOME, { label: '생활권', url: idxUrl }, { label: name, url }];
-    const h1 = `${name} · 예약 전 확인 안내`;
+    const lifeBase = name.replace(/\s*생활권$/, '');
+    const h1 = `${lifeBase} 출장마사지 · 생활권 안내`;
     const faqs = baseFaqs.slice(0, 4);
     const body = `
     ${C.pageHero(`${city ? city[1] : '경기'} 생활권`, h1, desc)}
