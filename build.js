@@ -84,6 +84,7 @@ function buildHome() {
 
   const body = `
   <section class="hero">
+    <div class="hero__bg" aria-hidden="true"></div>
     <div class="wrap hero__inner">
       <span class="badge-soft">경기도 권역·생활권 안내</span>
       <h1><span class="accent">경기 출장마사지</span> · 권역별 방문 가능 지역 안내</h1>
