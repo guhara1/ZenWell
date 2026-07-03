@@ -4,7 +4,7 @@
 const site = {
   brand: '간다GO',
   brandInitial: 'G',
-  domain: 'https://gyeonggi-massage.example.com', // 배포 도메인으로 교체
+  domain: 'https://zenwell.pages.dev', // 메인 배포 도메인
   baseTitle: '경기 출장마사지 안내 · 간다GO',
   tel: '0508-202-4719',
   telHref: 'tel:050820247419'.replace('050820247419', '0508-202-4719'),

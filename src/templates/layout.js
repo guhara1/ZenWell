@@ -78,6 +78,25 @@ function faqLd(faqs) {
   };
 }
 
+/* 실제 가격 기반 Service·Offer 스키마 (합법적 리치데이터, 가짜 후기·평점 미사용) */
+function serviceLd(page) {
+  if (!page.serviceArea) return null;
+  return {
+    '@type': 'Service',
+    '@id': abs(page.url) + '#service',
+    name: `${page.serviceArea} 출장마사지`,
+    serviceType: '출장마사지·홈타이',
+    inLanguage: 'ko-KR',
+    areaServed: { '@type': 'AdministrativeArea', name: page.serviceArea },
+    provider: { '@id': site.domain + '/#organization' },
+    offers: [
+      { '@type': 'Offer', name: '60분 코스', price: '90000', priceCurrency: 'KRW' },
+      { '@type': 'Offer', name: '90분 코스', price: '150000', priceCurrency: 'KRW' },
+      { '@type': 'Offer', name: '120분 코스', price: '180000', priceCurrency: 'KRW' },
+    ],
+  };
+}
+
 function buildJsonLd(page) {
   const graph = [
     {
@@ -94,6 +113,8 @@ function buildJsonLd(page) {
   if (page.crumbs && page.crumbs.length) graph.push(breadcrumbLd(page.crumbs));
   const faq = faqLd(page.faqs);
   if (faq) graph.push(faq);
+  const svc = serviceLd(page);
+  if (svc) graph.push(svc);
   if (page.extraLd) page.extraLd.forEach((x) => graph.push(x));
   return JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }, null, 2);
 }
@@ -196,6 +217,9 @@ function page(p) {
 <meta property="og:image" content="${ogImage}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#060607">
+<meta name="naver-site-verification" content="bbf93bb26d0189b76a00ca61ccdfacade07a9e34">
+<link rel="alternate" type="application/rss+xml" title="${esc(site.brand)} 경기 출장마사지 안내" href="/feed.xml">
+<link rel="sitemap" type="application/xml" href="/sitemap.xml">
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">

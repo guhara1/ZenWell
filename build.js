@@ -23,7 +23,9 @@ function emit(url, html, meta = {}) {
   const full = path.join(OUT, dir, 'index.html');
   fs.mkdirSync(path.dirname(full), { recursive: true });
   fs.writeFileSync(full, html);
-  pages.push({ url, noindex: !!meta.noindex, priority: meta.priority || 0.6 });
+  const title = (html.match(/<title>([^<]*)<\/title>/) || [])[1] || '';
+  const desc = (html.match(/<meta name="description" content="([^"]*)"/) || [])[1] || '';
+  pages.push({ url, noindex: !!meta.noindex, priority: meta.priority || 0.6, title, desc });
 }
 
 const cityBySlug = Object.fromEntries(R.cities.map((c) => [c[0], c]));
@@ -115,6 +117,22 @@ const pricingSection = (regionName) => `
     ${C.sectionHead('요금 안내', `${regionName ? regionName + ' 출장마사지 ' : ''}이용 코스와 요금`, '60·90·120분 코스별 기준 요금이며, 추가 비용 없이 있는 그대로 안내해 드립니다.')}
     ${C.pricing(PRICE_PLANS)}
     <p class="text-center" style="margin-top:20px;color:var(--color-text-muted)">지역·예약 시간대·이동 거리에 따라 상담 시 최종 확인됩니다.</p>
+  </section>
+  ${longtailSection(regionName)}`;
+
+/* 롱테일 내부링크 — 이용 상황별 주제 앵커(지역명 포함) */
+const LONGTAIL_USE = [
+  ['home', '자택 방문 마사지 이용 기준'],
+  ['hotel', '호텔·숙소 출장마사지 예약 전 확인'],
+  ['officetel', '오피스텔 홈타이 방문 안내'],
+  ['apartment', '아파트 공동현관 이용 기준'],
+  ['night', '야간·심야 출장마사지 예약 안내'],
+  ['station-terminal', 'KTX·SRT·터미널 인근 이용 기준'],
+];
+const longtailSection = (regionName) => `
+  <section class="section--tight wrap">
+    ${C.sectionHead('관련 주제', `${regionName} 출장마사지 · 이용 상황별 안내`, '상황별 이용 기준을 주제별로 확인하세요.')}
+    ${C.linkList(LONGTAIL_USE.map((u) => ({ url: `/gyeonggi/use/${u[0]}/`, label: `${regionName} ${u[1]}` })))}
   </section>`;
 
 /* =========================================================================
@@ -230,6 +248,7 @@ function buildHome() {
   emit('/', page({
     url: '/',
     canonical: '/',
+    serviceArea: '경기',
     title: '경기 출장마사지 · 권역별 방문 가능 지역 안내',
     metaTitle: '경기 출장마사지｜수원·성남·용인·고양·부천·평택 지역 안내 · 간다GO',
     desc: '경기 출장마사지 예약 전 수원·성남·용인·고양·부천·평택 생활권과 이용 기준 안내.',
@@ -295,7 +314,7 @@ function buildAreas() {
     `;
 
     emit(url, page({
-      url, canonical: url, title: variedTitle(a.name, charPhrase(a.lead), a.slug), desc: a.desc, crumbs, faqs, body,
+      url, canonical: url, serviceArea: a.name, title: variedTitle(a.name, charPhrase(a.lead), a.slug), desc: a.desc, crumbs, faqs, body,
     }), { priority: 0.9 });
   });
 }
@@ -366,7 +385,7 @@ function buildCities() {
     ${whoHowWhySection()}
     ${referenceSection()}
     `;
-    emit(url, page({ url, canonical: url, title: variedTitle(name, `${zoneList.slice(0, 3).join('·')} 생활권`, slug), desc: variedDesc(name, `${zoneList.slice(0, 3).join('·')} 생활권`, slug), crumbs, faqs, body }), { priority: 0.8 });
+    emit(url, page({ url, canonical: url, serviceArea: name, title: variedTitle(name, `${zoneList.slice(0, 3).join('·')} 생활권`, slug), desc: variedDesc(name, `${zoneList.slice(0, 3).join('·')} 생활권`, slug), crumbs, faqs, body }), { priority: 0.8 });
   });
 }
 
@@ -419,6 +438,7 @@ function buildDistricts() {
       `;
       emit(guUrl, page({
         url: guUrl, canonical: guUrl,
+        serviceArea: `${cityName} ${gu.name}`,
         title: variedTitle(`${cityName} ${gu.name}`, charPhrase(gu.desc), gu.slug),
         desc: variedDesc(`${cityName} ${gu.name}`, charPhrase(gu.desc), gu.slug),
         crumbs: guCrumbs, faqs: guFaqs, body: guBody,
@@ -465,6 +485,7 @@ function buildDistricts() {
         `;
         emit(dUrl, page({
           url: dUrl, canonical: dUrl,
+          serviceArea: dName,
           title: variedTitle(dName, charPhrase(dNote), dSlug),
           desc: variedDesc(dName, charPhrase(dNote), dSlug),
           crumbs: dCrumbs, faqs: dFaqs, body: dBody,
@@ -526,6 +547,7 @@ function buildCityDongs() {
       `;
       emit(dUrl, page({
         url: dUrl, canonical: dUrl,
+        serviceArea: dName,
         title: variedTitle(dName, charPhrase(dNote), dSlug),
         desc: variedDesc(dName, charPhrase(dNote), dSlug),
         crumbs: dCrumbs, faqs: dFaqs, body: dBody,
@@ -574,7 +596,7 @@ function buildLife() {
     ${referenceSection()}
     `;
     // 생활권 상세는 얇을 수 있어 index 유지하되 본문 충분히 확보
-    emit(url, page({ url, canonical: url, title: variedTitle(lifeBase, charPhrase(desc), slug), desc, crumbs, faqs, body }), { priority: 0.7 });
+    emit(url, page({ url, canonical: url, serviceArea: lifeBase, title: variedTitle(lifeBase, charPhrase(desc), slug), desc, crumbs, faqs, body }), { priority: 0.7 });
   });
 }
 
@@ -695,15 +717,56 @@ function buildSitemapPage() {
 /* =========================================================================
    sitemap.xml + robots.txt
    ========================================================================= */
+function xmlEsc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 function buildSitemapXml() {
-  const urls = pages.filter((p) => !p.noindex)
-    .map((p) => `  <url><loc>${site.domain}${p.url}</loc><priority>${p.priority.toFixed(1)}</priority></url>`)
+  const now = new Date().toISOString();
+  const today = now.slice(0, 10);
+  const indexable = pages.filter((p) => !p.noindex);
+
+  const urls = indexable
+    .map((p) => `  <url><loc>${site.domain}${p.url}</loc><lastmod>${today}</lastmod><priority>${p.priority.toFixed(1)}</priority></url>`)
     .join('\n');
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
   fs.writeFileSync(path.join(OUT, 'sitemap.xml'), xml);
 
-  const robots = `User-agent: *\nAllow: /\n\nSitemap: ${site.domain}/sitemap.xml\n`;
+  // robots.txt — 구글·네이버(Yeti)·빙 전면 허용 + 사이트맵
+  const robots =
+    `User-agent: *\nAllow: /\n\n` +
+    `User-agent: Googlebot\nAllow: /\n\n` +
+    `User-agent: Yeti\nAllow: /\n\n` +
+    `User-agent: NaverBot\nAllow: /\n\n` +
+    `User-agent: Bingbot\nAllow: /\n\n` +
+    `Sitemap: ${site.domain}/sitemap.xml\n`;
   fs.writeFileSync(path.join(OUT, 'robots.txt'), robots);
+
+  // RSS 2.0 피드 — 네이버 서치어드바이저 색인 촉진
+  const items = indexable
+    .slice()
+    .sort((a, b) => b.priority - a.priority)
+    .map((p) => `    <item>
+      <title>${xmlEsc(p.title)}</title>
+      <link>${site.domain}${p.url}</link>
+      <guid isPermaLink="true">${site.domain}${p.url}</guid>
+      <description>${xmlEsc(p.desc)}</description>
+      <pubDate>${new Date(now).toUTCString()}</pubDate>
+    </item>`)
+    .join('\n');
+  const rss = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>${xmlEsc(site.brand)} · 경기 출장마사지 지역 안내</title>
+    <link>${site.domain}/</link>
+    <atom:link href="${site.domain}/feed.xml" rel="self" type="application/rss+xml"/>
+    <description>경기도 권역·생활권과 이용 전 확인사항 안내</description>
+    <language>ko-KR</language>
+    <lastBuildDate>${new Date(now).toUTCString()}</lastBuildDate>
+${items}
+  </channel>
+</rss>\n`;
+  fs.writeFileSync(path.join(OUT, 'feed.xml'), rss);
 }
 
 /* ---- 이용/확인 페이지 본문 보강 문단 ---- */

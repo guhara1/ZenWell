@@ -1,4 +1,16 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://gyeonggi-massage.example.com/sitemap.xml
+User-agent: Googlebot
+Allow: /
+
+User-agent: Yeti
+Allow: /
+
+User-agent: NaverBot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+Sitemap: https://zenwell.pages.dev/sitemap.xml
